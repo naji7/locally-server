@@ -1,3 +1,8 @@
+import jwt, { Secret } from "jsonwebtoken";
+
+import { IAuthUser } from "../types";
+import { JWT_SECRET } from "../constant";
+
 export const stringToSlug = (str: string) => {
   str = str.replace(/^\s+|\s+$/g, ""); // trim
   str = str.toLowerCase();
@@ -15,4 +20,14 @@ export const stringToSlug = (str: string) => {
     .replace(/-+/g, "-"); // collapse dashes
 
   return str;
+};
+
+export const generateJWT = (payload: IAuthUser) => {
+  return jwt.sign(
+    {
+      payload,
+    },
+    JWT_SECRET as Secret,
+    { expiresIn: "1d" }
+  );
 };

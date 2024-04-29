@@ -8,7 +8,7 @@ declare global {
 
 export interface IAuthUser {
   id: string;
-  username: string;
+  fullName: string;
   email?: string;
 }
 
