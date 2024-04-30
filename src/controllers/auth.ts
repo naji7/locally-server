@@ -29,7 +29,15 @@ export class AuthController {
 
       req.body.password = hashedPassword;
 
-      await createUser({ data: req.body });
+      const user = await createUser({ data: req.body });
+
+      const payload = {
+        id: user.id,
+        fullName: fullName,
+        email: email,
+      };
+
+      const token = generateJWT(payload);
 
       const mailOptions = getMailOptions({
         to: email,
@@ -45,6 +53,7 @@ export class AuthController {
           res.status(400).send({ message: "Error sending registration email" });
         } else {
           res.status(200).send({
+            token,
             message: "Registration email sent successfully",
           });
         }

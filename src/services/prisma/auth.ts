@@ -3,7 +3,6 @@ import { generatedOTP } from "../../utils";
 import { prisma } from "./main";
 
 export const createUser = async ({ data }: any) => {
-  console.log("data : ", data);
   const {
     fullName,
     teleNo,
@@ -15,6 +14,22 @@ export const createUser = async ({ data }: any) => {
   } = data;
   try {
     const otp: any = await generatedOTP();
+
+    let endsAt;
+
+    switch (durationType) {
+      case "monthly":
+        endsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "quartly":
+        endsAt = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "yearly":
+        endsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        throw new Error("Invalid durationType");
+    }
 
     const user = await prisma.user.create({
       data: {
@@ -31,7 +46,7 @@ export const createUser = async ({ data }: any) => {
       },
     });
 
-    return await prisma.subsciption.create({
+    await prisma.subscription.create({
       data: {
         user: {
           connect: {
@@ -39,11 +54,13 @@ export const createUser = async ({ data }: any) => {
           },
         },
         durationType: durationType,
-        // endsAt: Date.now(),
+        endsAt: endsAt,
       },
     });
 
-    return otp;
+    return {
+      id: user.id,
+    };
   } catch (error) {
     throw new Error(error.message);
   }
