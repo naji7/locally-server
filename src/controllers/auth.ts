@@ -146,4 +146,34 @@ export class AuthController {
       next(error);
     }
   }
+
+  public async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    req.body = { ...req.body, email: req.body.email.toLowerCase() };
+
+    const { otp, email } = req.body;
+
+    try {
+      const verification = await prisma.verification.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (!verification) {
+        throw new Error("Email doesn't exists");
+      }
+
+      if (new Date().getTime() > +verification.expireAt) {
+        res.status(400).send({ message: "OTP expired" });
+      } else if (otp == verification.otp) {
+        res.status(200).send({
+          message: "OTP verified",
+        });
+      } else {
+        res.status(400).send({ message: "Invalid OTP" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -18,4 +18,6 @@ router.post(
   authController.sendOtpEmail
 );
 
+router.post("/verifyOtp", authController.verifyOtp);
+
 export { router as auth };

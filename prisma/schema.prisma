@@ -27,9 +27,9 @@ model SubscriptionPlan {
   tier               String
   entries            String
   oldEntries         String
-  monthlyPrice       Float?
-  semiAnnualPrice    Float?
-  annualPrice        Float?
+  monthlyPrice       String?
+  semiAnnualPrice    String?
+  annualPrice        String?
   features           String[]
   background         String
   main               String
