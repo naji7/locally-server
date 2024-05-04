@@ -61,4 +61,14 @@ export class SubscriptionController {
       next(error);
     }
   }
+
+  public async unsubscribe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sub = await prisma.subscriptionPlan.findMany();
+
+      res.status(200).send(sub);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

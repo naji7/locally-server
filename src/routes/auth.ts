@@ -8,6 +8,8 @@ const authController: AuthController = new AuthController();
 
 router.post("/register", authController.registerUser);
 
+router.post("/registerWithStripe", authController.registerWithStripe);
+
 router.get("/authenticate", authenticateJwt, authController.authenticate);
 
 router.post("/login", authController.login);

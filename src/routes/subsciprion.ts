@@ -13,4 +13,6 @@ router.put("/subscription/:id", subscriptionController.updateSubscription);
 
 router.get("/subscription", subscriptionController.getSubscriptions);
 
+router.post("/unsubscribe", subscriptionController.unsubscribe);
+
 export { router as subscription };

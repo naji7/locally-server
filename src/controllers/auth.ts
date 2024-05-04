@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
+import Stripe from "stripe";
 
 import { createUser, prisma, saveOtp } from "../services/prisma";
 import AppError from "../errors/app";
@@ -9,6 +10,7 @@ import {
   otpVerificationMessage,
   registerConfirmMessage,
 } from "../utils";
+import { Duration, SERVER_URL, STRIPE_API_KEY } from "../constant";
 
 export class AuthController {
   public async registerUser(req: Request, res: Response, next: NextFunction) {
@@ -62,6 +64,95 @@ export class AuthController {
       next(error);
     }
   }
+  public async registerWithStripe(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const stripe = new Stripe(STRIPE_API_KEY);
+      req.body = { ...req.body, email: req.body.email.toLowerCase() };
+
+      const {
+        fullName,
+        teleNo,
+        email,
+        password,
+        subId,
+        durationType,
+        coupen,
+        fivex,
+      } = req.body;
+
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [{ email: email }, { teleNo: teleNo }],
+        },
+      });
+
+      if (existingUser) throw new AppError("User already registered!", 409);
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      req.body.password = hashedPassword;
+
+      const existingSub = await prisma.subscriptionPlan.findFirst({
+        where: {
+          id: subId,
+        },
+      });
+
+      if (!existingSub) throw new Error("Subscription plan not found");
+
+      const user = await createUser({ data: req.body });
+
+      let priceId;
+
+      switch (durationType) {
+        case Duration.MONTH:
+          priceId = existingSub.priceIdMonth || "";
+          break;
+        case Duration.QUART:
+          priceId = existingSub.priceIdSemiAnnual || "";
+          break;
+        case Duration.YEAR:
+          priceId = existingSub.priceIdAnnual || "";
+          break;
+        default:
+          throw new Error("Invalid durationType");
+      }
+
+      const payload = {
+        id: user.id,
+        fullName: fullName,
+        email: email,
+      };
+
+      const token = generateJWT(payload);
+
+      const session = await stripe.checkout.sessions.create({
+        // success_url: `http://localhost:3000/saveUser?type=1&sub_id=${subId}&temp_id=${
+        //   user.id
+        // }&session_id={CHECKOUT_SESSION_ID}&coupen=${coupen || ""}&fivex=${
+        //   fivex || ""
+        // }&onetime=${0}`,
+        success_url: `http://localhost:3000/subscriptionComplete/?token=${token}`,
+        line_items: [{ price: priceId, quantity: 1 }],
+        mode: "subscription",
+        allow_promotion_codes: true,
+      });
+
+      res.json({
+        status: 200,
+        message: "Pay link accepted",
+        payurl: session?.url,
+        token,
+      });
+    } catch (error) {
+      console.log("error : ", error);
+      next(error);
+    }
+  }
 
   public async authenticate(req: Request, res: Response, next: NextFunction) {
     try {
@@ -69,6 +160,12 @@ export class AuthController {
 
       const user = await prisma.user.findUnique({
         where: { id: req.user.id },
+        select: {
+          email: true,
+          fullName: true,
+          subscriptionPlan: true,
+          subsciption: true,
+        },
       });
 
       return res.status(200).send({ user });

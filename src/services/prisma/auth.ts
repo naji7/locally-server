@@ -1,4 +1,3 @@
-import { ISendOtp } from "../../types";
 import { generatedOTP } from "../../utils";
 import { prisma } from "./main";
 
@@ -13,8 +12,6 @@ export const createUser = async ({ data }: any) => {
     durationType,
   } = data;
   try {
-    const otp: any = await generatedOTP();
-
     let endsAt;
 
     switch (durationType) {
