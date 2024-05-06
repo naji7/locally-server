@@ -4,7 +4,7 @@ import AppError from "../errors/app";
 import logger from "../services/winston";
 
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
-  const error = new AppError("Invalid Request!", 404);
+  const error = new AppError("Invalid API Request!", 404);
   next(error);
 };
 
