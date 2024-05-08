@@ -6,9 +6,13 @@ import { authenticateJwt, validateBodyParams } from "../middlewares";
 const router = Router();
 const authController: AuthController = new AuthController();
 
-router.post("/register", authController.registerUser);
-
 router.post("/registerWithStripe", authController.registerWithStripe);
+
+router.post(
+  "/updateUserSubscription",
+  authenticateJwt,
+  authController.updateUserSubscription
+);
 
 router.get("/authenticate", authenticateJwt, authController.authenticate);
 

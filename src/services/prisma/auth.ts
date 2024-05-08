@@ -1,3 +1,4 @@
+import { Duration } from "../../constant";
 import { generatedOTP } from "../../utils";
 import { prisma } from "./main";
 
@@ -15,13 +16,13 @@ export const createUser = async ({ data }: any) => {
     let endsAt;
 
     switch (durationType) {
-      case "monthly":
+      case Duration.MONTH:
         endsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
         break;
-      case "quartly":
+      case Duration.QUART:
         endsAt = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000);
         break;
-      case "yearly":
+      case Duration.YEAR:
         endsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         break;
       default:
@@ -43,11 +44,16 @@ export const createUser = async ({ data }: any) => {
       },
     });
 
-    await prisma.subscription.create({
+    const subs = await prisma.subscription.create({
       data: {
         user: {
           connect: {
             id: user.id,
+          },
+        },
+        subscriptionPlan: {
+          connect: {
+            id: subId,
           },
         },
         durationType: durationType,
@@ -57,6 +63,7 @@ export const createUser = async ({ data }: any) => {
 
     return {
       id: user.id,
+      subsId: subs.id,
     };
   } catch (error) {
     throw new Error(error.message);

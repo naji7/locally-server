@@ -5,6 +5,7 @@ import { prisma } from "../services/prisma";
 import AppError from "../errors/app";
 import { getMailOptions, getTransporter } from "../services/email";
 import { stringToSlug } from "../utils";
+import { cancelSubscription, retrieveSession } from "../services/stripe";
 
 export class SubscriptionController {
   public async addSubscription(
@@ -64,9 +65,42 @@ export class SubscriptionController {
 
   public async unsubscribe(req: Request, res: Response, next: NextFunction) {
     try {
-      const sub = await prisma.subscriptionPlan.findMany();
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          id: req.user?.id,
+        },
+        select: {
+          subsciption: true,
+        },
+      });
 
-      res.status(200).send(sub);
+      if (!existingUser) throw new AppError("User doesn't exists", 404);
+
+      const subId = existingUser.subsciption[0].id;
+
+      const subscription = await prisma.subscription.findUnique({
+        where: {
+          id: subId,
+        },
+      });
+
+      if (!subscription) throw new AppError("Subscription doesn't exists", 404);
+
+      await cancelSubscription({
+        subscriptionId: subscription?.stripeSubscriptionId,
+      });
+
+      const updateSub = await prisma.subscription.update({
+        where: {
+          id: subId,
+        },
+        data: {
+          status: "CANCELLED",
+          cancelledAt: new Date(Date.now()),
+        },
+      });
+
+      res.status(200).send(updateSub);
     } catch (error) {
       next(error);
     }
