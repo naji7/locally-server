@@ -82,6 +82,18 @@ model Transaction {
   userId             String               @db.ObjectId           
 }
 
+model Giveaway {
+  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  description        String
+  startDate          DateTime
+  endDate            DateTime
+  price              Float
+  youtubeLink        String
+  createdAt          DateTime      @default(now())
+  status             Int           @default(0)  // 0 - Active, 1 - Deactive
+}
+
 model Verification {
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
   email              String        @unique

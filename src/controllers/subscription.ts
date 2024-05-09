@@ -1,11 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import bcrypt from "bcrypt";
 
 import { prisma } from "../services/prisma";
 import AppError from "../errors/app";
-import { getMailOptions, getTransporter } from "../services/email";
-import { stringToSlug } from "../utils";
-import { cancelSubscription, retrieveSession } from "../services/stripe";
+import { cancelSubscription } from "../services/stripe";
 
 export class SubscriptionController {
   public async addSubscription(

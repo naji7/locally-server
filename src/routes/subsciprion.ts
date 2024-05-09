@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { SubscriptionController } from "../controllers";
-import { authenticateJwt, validateBodyParams } from "../middlewares";
+import { authenticateJwt } from "../middlewares";
 
 const router = Router();
 const subscriptionController: SubscriptionController =
