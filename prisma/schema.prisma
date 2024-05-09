@@ -86,6 +86,7 @@ model Giveaway {
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
   title              String
   description        String?
+  type               String        @default("WEEKLY")  // WEEKLY, MAJOR
   startDate          DateTime
   endDate            DateTime
   price              Float
