@@ -18,14 +18,19 @@ export class GiveawayController {
     }
   }
 
-  public async retrieveGiveaways(
+  public async getUpcomingGiveaways(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
     try {
+      const currentDate = new Date();
+
       const sub = await prisma.giveaway.findMany({
         where: {
+          startDate: {
+            gt: currentDate,
+          },
           status: 0,
         },
       });

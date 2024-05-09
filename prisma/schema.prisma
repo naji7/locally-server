@@ -85,11 +85,12 @@ model Transaction {
 model Giveaway {
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
   name               String
-  description        String
+  description        String?
   startDate          DateTime
   endDate            DateTime
   price              Float
-  youtubeLink        String
+  youtubeLink        String?
+  winningNumber      Int[]
   createdAt          DateTime      @default(now())
   status             Int           @default(0)  // 0 - Active, 1 - Deactive
 }

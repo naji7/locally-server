@@ -5,8 +5,8 @@ import { GiveawayController } from "../controllers";
 const router = Router();
 const giveawayController: GiveawayController = new GiveawayController();
 
-router.post("/giveaways", giveawayController.addGiveaways);
+router.post("/giveaway", giveawayController.addGiveaways);
 
-router.get("/activeGiveaways", giveawayController.retrieveGiveaways);
+router.get("/upcomingGiveaways", giveawayController.getUpcomingGiveaways);
 
 export { router as giveaway };
