@@ -6,14 +6,14 @@ const logger = createLogger({
   defaultMeta: { service: "winlads-service" },
   transports: [
     new transports.Console(),
-    new transports.File({
-      level: "warn",
-      filename: `${logDirPath}/logsWarnings.log`,
-    }),
-    new transports.File({
-      level: "error",
-      filename: `${logDirPath}/logsErrors.log`,
-    }),
+    // new transports.File({
+    //   level: "warn",
+    //   filename: `${logDirPath}/logsWarnings.log`,
+    // }),
+    // new transports.File({
+    //   level: "error",
+    //   filename: `${logDirPath}/logsErrors.log`,
+    // }),
   ],
   format: format.combine(
     format.timestamp(),

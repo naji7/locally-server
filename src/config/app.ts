@@ -12,5 +12,4 @@ const allowedOrigins = [
 
 export const corsOptions: CorsOptions = {
   origin: allowedOrigins,
-  credentials: true,
 };
