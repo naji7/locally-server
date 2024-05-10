@@ -3,3 +3,8 @@ export enum Duration {
   QUART = "quartly",
   YEAR = "yearly",
 }
+
+export enum GiveawayType {
+  WEEKLY = "WEEKLY",
+  MAJOR = "MAJOR",
+}

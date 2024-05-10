@@ -22,6 +22,8 @@ model User {
   subId              String               @db.ObjectId
   subsciption        Subscription[]
   transaction        Transaction[]
+  totalEntries       Int                  @default(0)
+  entries            Json[]
 }
 
 model SubscriptionPlan {
@@ -96,6 +98,8 @@ model Giveaway {
   createdAt          DateTime      @default(now())
   status             Int           @default(0)  // 0 - Active, 1 - Deactive
 }
+
+
 
 model Verification {
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId

@@ -174,6 +174,8 @@ export class AuthController {
           email: true,
           fullName: true,
           balance: true,
+          totalEntries: true,
+          entries: true,
           subscriptionPlan: true,
           subsciption: true,
           transaction: true,

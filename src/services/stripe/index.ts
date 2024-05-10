@@ -31,3 +31,18 @@ export const cancelSubscription = async ({ subscriptionId }: any) => {
 
   return sub;
 };
+
+export const renewSubscription = async ({ subscriptionId }: any) => {
+  const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+
+  if (
+    stripeSub.cancel_at_period_end === true &&
+    stripeSub.status === "active"
+  ) {
+    await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: false,
+    });
+  }
+
+  return stripeSub;
+};

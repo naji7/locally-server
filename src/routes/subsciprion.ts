@@ -19,4 +19,10 @@ router.post(
   subscriptionController.unsubscribe
 );
 
+router.post(
+  "/renew",
+  authenticateJwt,
+  subscriptionController.renewSubscription
+);
+
 export { router as subscription };
