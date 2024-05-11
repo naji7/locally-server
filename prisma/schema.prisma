@@ -20,17 +20,16 @@ model User {
   updatedAt          DateTime             @updatedAt
   subscriptionPlan   SubscriptionPlan     @relation(fields: [subId], references: [id])
   subId              String               @db.ObjectId
-  subsciption        Subscription[]
+  subscription       Subscription[]
   transaction        Transaction[]
-  totalEntries       Int                  @default(0)
-  entries            Json[]
+  entries            Entries[] 
 }
 
 model SubscriptionPlan {
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
   tier               String
-  entries            String
-  oldEntries         String
+  entries            Int
+  oldEntries         Int
   monthlyPrice       String?
   semiAnnualPrice    String?
   annualPrice        String?
@@ -44,7 +43,7 @@ model SubscriptionPlan {
   updatedAt          DateTime      @updatedAt
   status             String        @default("ACTIVE")  // ACTIVE, CANCELLED
   users              User[]
-  Subscription       Subscription[]
+  subscription       Subscription[]
 }
 
 model Subscription {
@@ -97,8 +96,18 @@ model Giveaway {
   imageUrl           String?
   createdAt          DateTime      @default(now())
   status             Int           @default(0)  // 0 - Active, 1 - Deactive
+  entries            Entries[]
 }
 
+
+model Entries{
+  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+  giveaway           Giveaway      @relation(fields: [giveawayId], references: [id])
+  giveawayId         String        @db.ObjectId
+  user               User          @relation(fields: [userId], references: [id])
+  userId             String        @db.ObjectId
+  entries            Int
+}
 
 
 model Verification {

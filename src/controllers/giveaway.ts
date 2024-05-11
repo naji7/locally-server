@@ -8,36 +8,23 @@ import { GiveawayType } from "../constant";
 export class GiveawayController {
   public async addGiveaways(req: Request, res: Response, next: NextFunction) {
     try {
-      const { type } = req.body;
-
       const sub = await prisma.giveaway.create({ data: req.body });
 
-      if (type === GiveawayType.WEEKLY) {
-        const allUsers = await prisma.user.findMany();
+      const allUsers = await prisma.user.findMany({
+        select: {
+          id: true,
+          subscriptionPlan: true,
+          subscription: true,
+        },
+      });
 
-        const entryObject = {
-          giveawayId: sub.id,
-          startDate: sub.startDate,
-          imageUrl: sub.imageUrl,
-          title: sub.title,
-          entries: 25,
-        };
-
-        for (const user of allUsers) {
-          let entries: any = user.entries;
-          let totalEntries = user.totalEntries;
-
-          if (Array.isArray(entries)) {
-            entries.push(entryObject);
-          } else {
-            entries = [entryObject];
-          }
-
-          await prisma.user.update({
-            where: { id: user.id },
+      for (const user of allUsers) {
+        if (user.subscription[0].endsAt > new Date(Date.now())) {
+          await prisma.entries.create({
             data: {
-              entries: entries,
-              totalEntries: totalEntries + 25,
+              giveawayId: sub.id,
+              userId: user.id,
+              entries: user.subscriptionPlan.entries,
             },
           });
         }
@@ -66,6 +53,34 @@ export class GiveawayController {
             gt: currentDate,
           },
           status: 0,
+        },
+      });
+
+      res.status(200).send(sub);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getActiveUserEntries(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user?.id;
+      const sub = await prisma.entries.findMany({
+        where: {
+          userId: userId,
+          giveaway: {
+            status: 0,
+          },
+        },
+        select: {
+          id: true,
+          giveaway: true,
+          entries: true,
+          userId: true,
         },
       });
 

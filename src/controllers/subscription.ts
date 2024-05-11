@@ -67,13 +67,13 @@ export class SubscriptionController {
           id: req.user?.id,
         },
         select: {
-          subsciption: true,
+          subscription: true,
         },
       });
 
       if (!existingUser) throw new AppError("User doesn't exists", 404);
 
-      const subId = existingUser.subsciption[0].id;
+      const subId = existingUser.subscription[0].id;
 
       const subscription = await prisma.subscription.findUnique({
         where: {
@@ -114,13 +114,13 @@ export class SubscriptionController {
           id: req.user?.id,
         },
         select: {
-          subsciption: true,
+          subscription: true,
         },
       });
 
       if (!existingUser) throw new AppError("User doesn't exists", 404);
 
-      const subId = existingUser.subsciption[0].id;
+      const subId = existingUser.subscription[0].id;
 
       const subscription = await prisma.subscription.findUnique({
         where: {

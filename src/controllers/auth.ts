@@ -174,11 +174,10 @@ export class AuthController {
           email: true,
           fullName: true,
           balance: true,
-          totalEntries: true,
-          entries: true,
           subscriptionPlan: true,
-          subsciption: true,
+          subscription: true,
           transaction: true,
+          entries: true,
         },
       });
 
