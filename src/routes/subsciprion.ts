@@ -25,4 +25,14 @@ router.post(
   subscriptionController.renewSubscription
 );
 
+router.post("/oneOff", subscriptionController.addOneOffPackage);
+
+router.get("/oneOff", subscriptionController.getActiveOneOffPackages);
+
+router.post(
+  "/buyOneOffPackage",
+  authenticateJwt,
+  subscriptionController.buyOneOffPackage
+);
+
 export { router as subscription };

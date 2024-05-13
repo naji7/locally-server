@@ -39,7 +39,7 @@ export class GiveawayController {
     }
   }
 
-  public async getUpcomingGiveaways(
+  public async getUserUpcomingGiveaways(
     req: Request,
     res: Response,
     next: NextFunction
@@ -53,6 +53,19 @@ export class GiveawayController {
             gt: currentDate,
           },
           status: 0,
+        },
+        select: {
+          id: true,
+          title: true,
+          startDate: true,
+          imageUrl: true,
+          reqEntries: true,
+          type: true,
+          entries: {
+            where: {
+              userId: req.user?.id,
+            },
+          },
         },
       });
 

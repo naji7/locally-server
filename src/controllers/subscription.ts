@@ -148,4 +148,124 @@ export class SubscriptionController {
       next(error);
     }
   }
+
+  public async buyOneOffPackage(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { method } = req.query;
+      const { giveawayId, oneOffId } = req.body;
+      const userId = req.user?.id;
+
+      if (method === "points") {
+        // TODO : we can get from req.user
+        const userExist = await prisma.user.findUnique({
+          where: {
+            id: userId,
+          },
+          select: {
+            balance: true,
+          },
+        });
+
+        if (!userExist) throw new AppError("User doesn't exists", 404);
+
+        const oneOffExist = await prisma.oneOffPackage.findUnique({
+          where: {
+            id: oneOffId,
+          },
+        });
+
+        if (!oneOffExist) throw new AppError("Giveaway doesn't exists", 404);
+
+        if (oneOffExist.price > userExist.balance)
+          throw new AppError("Insufficient balance", 400);
+
+        const userEntryRes = await prisma.entries.findFirst({
+          where: {
+            userId: userId,
+            giveawayId: giveawayId,
+          },
+        });
+
+        if (!userEntryRes) throw new AppError("User entry doesn't exist", 404);
+
+        await prisma.entries.update({
+          where: {
+            id: userEntryRes?.id,
+          },
+          data: {
+            entries: userEntryRes?.entries + oneOffExist.entries,
+          },
+        });
+
+        const txn = await prisma.transaction.create({
+          data: {
+            txnType: "DR",
+            txnMethod: "POINTS",
+            amount: oneOffExist.price,
+            currency: "",
+            customer: "",
+            customerEmail: req.user?.email as string,
+            mode: "payment",
+            paymentInternet: "",
+            startAt: new Date(),
+            endsAt: new Date(),
+            paymentMethod: "POINTS",
+            invoice: "",
+            user: {
+              connect: {
+                id: req.user?.id,
+              },
+            },
+          },
+        });
+
+        res
+          .status(200)
+          .send({ txn, message: "Successfully bought one off package" });
+      } else {
+        throw new AppError("Invalid method", 400);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async addOneOffPackage(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const oneOff = await prisma.oneOffPackage.create({ data: req.body });
+
+      res.status(200).send({
+        data: oneOff,
+        message: `one off package successfully added`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getActiveOneOffPackages(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const packages = await prisma.oneOffPackage.findMany({
+        where: {
+          status: "ACTIVE",
+        },
+      });
+
+      res.status(200).send(packages);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
