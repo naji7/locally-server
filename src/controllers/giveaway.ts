@@ -102,4 +102,61 @@ export class GiveawayController {
       next(error);
     }
   }
+
+  public async drawGiveaway(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { giveawayId } = req.body;
+
+      const giveaway = await prisma.giveaway.findUnique({
+        where: {
+          id: giveawayId,
+        },
+      });
+
+      if (!giveaway) throw new AppError("Giveaway not found", 404);
+
+      if (giveaway.status !== 0) throw new AppError("Draw already made", 400);
+
+      const getEntries = await prisma.entries.findMany({
+        where: {
+          giveawayId: giveawayId,
+        },
+      });
+
+      const reqEntries = giveaway.reqEntries;
+      const userIds: any = [];
+      const selectedUsers: any = [];
+
+      getEntries.forEach((item) => {
+        if (item.entries >= reqEntries) {
+          selectedUsers.push(item.userId);
+          const pushCount = Math.floor(item.entries / reqEntries);
+          for (let i = 0; i < pushCount; i++) {
+            userIds.push(item.userId);
+          }
+        }
+      });
+
+      const winningUser = userIds[Math.floor(Math.random() * userIds.length)];
+
+      const updatedGiveaway = await prisma.giveaway.update({
+        where: {
+          id: giveawayId,
+        },
+        data: {
+          wonUser: winningUser,
+          selectedUsers: selectedUsers,
+          drawedAt: new Date(Date.now()),
+          drawStatus: 1,
+        },
+      });
+
+      res.status(200).send({
+        updatedGiveaway,
+        message: "Giveaway drawn successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

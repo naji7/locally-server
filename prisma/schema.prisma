@@ -103,11 +103,14 @@ model Giveaway {
   endDate            DateTime
   price              Float
   youtubeLink        String?
-  winningNumber      Int[]
+  wonUser            String?
+  selectedUsers      String[]
   imageUrl           String?
   reqEntries         Int
   createdAt          DateTime      @default(now())
+  drawedAt           DateTime?
   status             Int           @default(0)  // 0 - Active, 1 - Deactive
+  drawStatus         Int           @default(0)  // 0 - Not Drawn, 1 - Drawn
   entries            Entries[]
 }
 

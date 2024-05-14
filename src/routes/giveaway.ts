@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { GiveawayController } from "../controllers";
-import { authenticateJwt } from "../middlewares";
+import { authenticateJwt, validateBodyParams } from "../middlewares";
 
 const router = Router();
 const giveawayController: GiveawayController = new GiveawayController();
@@ -18,6 +18,12 @@ router.get(
   "/activeUserEntries",
   authenticateJwt,
   giveawayController.getActiveUserEntries
+);
+
+router.post(
+  "/draw",
+  validateBodyParams("giveawayId"),
+  giveawayController.drawGiveaway
 );
 
 export { router as giveaway };
