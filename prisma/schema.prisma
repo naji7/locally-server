@@ -23,6 +23,7 @@ model User {
   subscription       Subscription[]
   transaction        Transaction[]
   entries            Entries[] 
+  giveaway           Giveaway[]
 }
 
 model SubscriptionPlan {
@@ -103,7 +104,9 @@ model Giveaway {
   endDate            DateTime
   price              Float
   youtubeLink        String?
-  wonUser            String?
+  // winningUser        String?
+  winningUser        User?          @relation(fields: [winningUserId], references: [id])
+  winningUserId      String?        @db.ObjectId
   selectedUsers      String[]
   imageUrl           String?
   reqEntries         Int

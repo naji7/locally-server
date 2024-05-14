@@ -26,4 +26,6 @@ router.post(
   giveawayController.drawGiveaway
 );
 
+router.get("/winners", authenticateJwt, giveawayController.getPreviousWinners);
+
 export { router as giveaway };

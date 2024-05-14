@@ -144,7 +144,7 @@ export class GiveawayController {
           id: giveawayId,
         },
         data: {
-          wonUser: winningUser,
+          winningUserId: winningUser,
           selectedUsers: selectedUsers,
           drawedAt: new Date(Date.now()),
           drawStatus: 1,
@@ -155,6 +155,34 @@ export class GiveawayController {
         updatedGiveaway,
         message: "Giveaway drawn successfully",
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getPreviousWinners(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const sub = await prisma.giveaway.findMany({
+        where: {
+          drawStatus: 1,
+        },
+        select: {
+          imageUrl: true,
+          title: true,
+          drawedAt: true,
+          winningUser: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      });
+
+      res.status(200).send(sub);
     } catch (error) {
       next(error);
     }
