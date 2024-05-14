@@ -209,7 +209,7 @@ export class SubscriptionController {
             currency: "",
             customer: "",
             customerEmail: req.user?.email as string,
-            mode: "payment",
+            mode: "One Off Payment",
             paymentInternet: "",
             startAt: new Date(),
             endsAt: new Date(),
