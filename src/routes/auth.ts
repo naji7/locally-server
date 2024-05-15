@@ -26,4 +26,10 @@ router.post(
 
 router.post("/verifyOtp", authController.verifyOtp);
 
+router.get(
+  "/transactions",
+  authenticateJwt,
+  authController.getUserTransactions
+);
+
 export { router as auth };

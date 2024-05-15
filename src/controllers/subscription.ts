@@ -201,6 +201,15 @@ export class SubscriptionController {
           },
         });
 
+        await prisma.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            balance: userExist.balance - oneOffExist.price,
+          },
+        });
+
         const txn = await prisma.transaction.create({
           data: {
             txnType: "DR",
@@ -230,6 +239,7 @@ export class SubscriptionController {
         throw new AppError("Invalid method", 400);
       }
     } catch (error) {
+      console.log("error : ", error);
       next(error);
     }
   }

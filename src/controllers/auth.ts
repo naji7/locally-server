@@ -187,6 +187,24 @@ export class AuthController {
     }
   }
 
+  public async getUserTransactions(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      if (!req.user) throw new AppError("User not authenticated!", 401);
+
+      const txns = await prisma.transaction.findMany({
+        where: { userId: req.user.id },
+      });
+
+      return res.status(200).send(txns);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async login(req: Request, res: Response, next: NextFunction) {
     try {
       req.body = { ...req.body, email: req.body.email.toLowerCase() };
