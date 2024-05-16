@@ -3,15 +3,7 @@ import { generatedOTP } from "../../utils";
 import { prisma } from "./main";
 
 export const createUser = async ({ data }: any) => {
-  const {
-    fullName,
-    teleNo,
-    email,
-    password,
-    affiliateId,
-    subId,
-    durationType,
-  } = data;
+  const { fullName, teleNo, email, password, subId, durationType } = data;
   try {
     let endsAt;
 
@@ -35,7 +27,6 @@ export const createUser = async ({ data }: any) => {
         teleNo: teleNo,
         email: email,
         password: password,
-        affiliateId: affiliateId,
         subscriptionPlan: {
           connect: {
             id: subId,

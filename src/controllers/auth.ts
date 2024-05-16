@@ -105,13 +105,15 @@ export class AuthController {
       const { sessionId, subId } = req.body;
 
       // TODO : define type later
-      const session: any = await retrieveSession({ sessionId });
+      const session: any = await retrieveSession({
+        sessionId,
+        type: "subscription",
+      });
 
       if (!session) throw new Error("Invalid session");
 
       if (session) {
         if (session.payment_status === "paid") {
-          console.log("haiiii : ", subId);
           const up = await prisma.subscription.update({
             where: {
               id: subId,
@@ -122,8 +124,6 @@ export class AuthController {
               stripeSubscriptionId: session.subscription?.id,
             },
           });
-
-          console.log("up : ", session?.subscription.current_period_start);
 
           const resss = await prisma.transaction.create({
             data: {
@@ -151,8 +151,6 @@ export class AuthController {
             },
           });
 
-          console.log("ress : ", resss);
-
           res.json({
             status: 200,
             message: "Account created successfully",
@@ -171,6 +169,7 @@ export class AuthController {
       const user = await prisma.user.findUnique({
         where: { id: req.user.id },
         select: {
+          id: true,
           email: true,
           fullName: true,
           balance: true,

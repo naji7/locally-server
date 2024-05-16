@@ -16,9 +16,37 @@ export const createSession = async ({ token, priceId, subId }: any) => {
   return session;
 };
 
-export const retrieveSession = async ({ sessionId }: any) => {
+export const createSessionForOneOff = async ({
+  oneOffName,
+  price,
+  token,
+  giveawayId,
+  oneOffId,
+}: any) => {
+  const session = await stripe.checkout.sessions.create({
+    success_url: `${CLIENT_URL}/subscriptionComplete/?token=${token}&session_id={CHECKOUT_SESSION_ID}&giveawayId=${giveawayId}&oneOffId=${oneOffId}`,
+    line_items: [
+      {
+        price_data: {
+          currency: "aud",
+          unit_amount: price,
+          product_data: {
+            name: oneOffName,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    allow_promotion_codes: true,
+  });
+
+  return session;
+};
+
+export const retrieveSession = async ({ sessionId, type }: any) => {
   const session = await stripe.checkout.sessions.retrieve(sessionId, {
-    expand: ["subscription"],
+    expand: [type],
   });
 
   return session;

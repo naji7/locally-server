@@ -2,7 +2,13 @@ import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "../services/prisma";
 import AppError from "../errors/app";
-import { cancelSubscription, renewSubscription } from "../services/stripe";
+import {
+  cancelSubscription,
+  createSessionForOneOff,
+  renewSubscription,
+  retrieveSession,
+} from "../services/stripe";
+import { generateJWT, toCent } from "../utils";
 
 export class SubscriptionController {
   public async addSubscription(
@@ -159,27 +165,24 @@ export class SubscriptionController {
       const { giveawayId, oneOffId } = req.body;
       const userId = req.user?.id;
 
+      // TODO : we can get from req.user
+      const userExist = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!userExist) throw new AppError("User doesn't exists", 404);
+
+      const oneOffExist = await prisma.oneOffPackage.findUnique({
+        where: {
+          id: oneOffId,
+        },
+      });
+
+      if (!oneOffExist) throw new AppError("Giveaway doesn't exists", 404);
+
       if (method === "points") {
-        // TODO : we can get from req.user
-        const userExist = await prisma.user.findUnique({
-          where: {
-            id: userId,
-          },
-          select: {
-            balance: true,
-          },
-        });
-
-        if (!userExist) throw new AppError("User doesn't exists", 404);
-
-        const oneOffExist = await prisma.oneOffPackage.findUnique({
-          where: {
-            id: oneOffId,
-          },
-        });
-
-        if (!oneOffExist) throw new AppError("Giveaway doesn't exists", 404);
-
         if (oneOffExist.price > userExist.balance)
           throw new AppError("Insufficient balance", 400);
 
@@ -235,11 +238,108 @@ export class SubscriptionController {
         res
           .status(200)
           .send({ txn, message: "Successfully bought one off package" });
+      } else if (method === "stripe") {
+        const payload = {
+          id: userExist.id,
+          fullName: userExist.fullName,
+          email: userExist.email,
+        };
+
+        const token = generateJWT(payload);
+
+        const price = toCent(oneOffExist.price);
+
+        const session = await createSessionForOneOff({
+          token: token,
+          giveawayId: giveawayId,
+          oneOffId: oneOffExist.id,
+          oneOffName: oneOffExist.title,
+          price: price,
+        });
+
+        res.json({
+          status: 200,
+          message: "Pay link accepted",
+          payurl: session?.url,
+        });
       } else {
         throw new AppError("Invalid method", 400);
       }
     } catch (error) {
       console.log("error : ", error);
+      next(error);
+    }
+  }
+
+  public async updateUserOneOffStripe(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { sessionId, giveawayId, oneOffId } = req.body;
+
+      const session: any = await retrieveSession({
+        sessionId,
+        type: "payment_intent",
+      });
+
+      if (!session) throw new Error("Invalid session");
+
+      if (session) {
+        if (session.payment_status === "paid") {
+          const userEntryRes = await prisma.entries.findFirst({
+            where: {
+              userId: req.user?.id,
+              giveawayId: giveawayId,
+            },
+          });
+
+          if (!userEntryRes)
+            throw new AppError("User entry doesn't exist", 404);
+
+          const oneOffExist = await prisma.oneOffPackage.findUnique({
+            where: {
+              id: oneOffId,
+            },
+          });
+
+          if (!oneOffExist) throw new AppError("Giveaway doesn't exists", 404);
+
+          await prisma.entries.update({
+            where: {
+              id: userEntryRes?.id,
+            },
+            data: {
+              entries: userEntryRes?.entries + oneOffExist.entries,
+            },
+          });
+
+          const txn = await prisma.transaction.create({
+            data: {
+              txnType: "DR",
+              txnMethod: "STRIPE",
+              amount: session.amount_total / 100,
+              currency: session.currency as string,
+              customerEmail: session.customer_details?.email as string,
+              mode: "One Off Payment",
+              paymentInternet: session.payment_intent.id,
+              startAt: new Date(),
+              paymentMethod: "STRIPE",
+              user: {
+                connect: {
+                  id: req.user?.id,
+                },
+              },
+            },
+          });
+
+          res
+            .status(200)
+            .send({ txn, message: "Successfully bought one off package" });
+        }
+      }
+    } catch (error) {
       next(error);
     }
   }

@@ -35,4 +35,10 @@ router.post(
   subscriptionController.buyOneOffPackage
 );
 
+router.post(
+  "/updateUserOneOffStripe",
+  authenticateJwt,
+  subscriptionController.updateUserOneOffStripe
+);
+
 export { router as subscription };
