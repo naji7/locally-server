@@ -23,27 +23,36 @@ model User {
   transaction        Transaction[]
   entries            Entries[] 
   giveaway           Giveaway[]
+  // referredBy         Referral[] 
 }
 
 model SubscriptionPlan {
-  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
-  tier               String
-  entries            Int
-  oldEntries         Int
-  monthlyPrice       String?
-  semiAnnualPrice    String?
-  annualPrice        String?
-  features           String[]
-  background         String
-  main               String
-  priceIdMonth       String
-  priceIdSemiAnnual  String
-  priceIdAnnual      String
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  status             String        @default("ACTIVE")  // ACTIVE, CANCELLED
-  users              User[]
-  subscription       Subscription[]
+  id                        String        @id @default(auto()) @map("_id") @db.ObjectId
+  tier                      String
+  entries                   Int
+  oldEntries                Int
+  monthlyPrice              String?
+  semiAnnualPrice           String?
+  annualPrice               String?
+  features                  String[]
+  background                String
+  main                      String
+  priceIdMonth              String
+  priceIdSemiAnnual         String
+  priceIdAnnual             String
+  monthlyRefferalCount      Int
+  semiAnnualRefferalCount   Int
+  annualRefferalCount       Int
+  refferalLimitCommisionL1  Float
+  refferalLimitCommisionL2  Float
+  refferalLimitCommisionL3  Float
+  refferalLimitCommisionL4  Float
+  // withdrawLimit             Int
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+  status                    String        @default("ACTIVE")  // ACTIVE, CANCELLED
+  users                     User[]
+  subscription              Subscription[]
 }
 
 model OneOffPackage {
@@ -116,6 +125,12 @@ model Giveaway {
   entries            Entries[]
 }
 
+// model Referral {
+//   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+//   referredBy         User          @relation(fields: [referredById], references: [id])
+//   referredById       String        @db.ObjectId
+// }
+
 
 model Entries{
   id                 String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -133,6 +148,23 @@ model Verification {
   otp                Int           @unique
   createdAt          DateTime      @default(now())
   expireAt           DateTime      
+}
+
+model Partners {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  landNo             String?               
+  teledNo            String?               
+  email              String               
+  address            String
+  description        String               
+  facebookUrl        String               
+  wbsiteUrl          String               
+  instaUrl           String          
+  status             String               @default("ACTIVE")  // ACTIVE, CANCELLED                  
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+ 
 }
 
 model Raffle {

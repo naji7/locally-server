@@ -6,7 +6,7 @@ import cors from "cors";
 
 import logger from "./services/winston";
 import { corsOptions } from "./config";
-import { auth, giveaway, subscription } from "./routes";
+import { auth, giveaway, subscription, user } from "./routes";
 import { notFound, serverError } from "./middlewares";
 
 const app = express();
@@ -21,6 +21,7 @@ app.use(cors(corsOptions));
 app.use("/api", auth);
 app.use("/api", subscription);
 app.use("/api", giveaway);
+app.use("/api", user);
 
 const port = process.env.PORT || 5000;
 app.listen(parseInt(port as string), () => {

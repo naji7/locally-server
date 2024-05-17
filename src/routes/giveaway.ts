@@ -8,6 +8,8 @@ const giveawayController: GiveawayController = new GiveawayController();
 
 router.post("/giveaway", giveawayController.addGiveaways);
 
+router.get("/giveaway", giveawayController.getAllGiveaways);
+
 router.get(
   "/upcomingGiveaways",
   authenticateJwt,

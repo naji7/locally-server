@@ -103,6 +103,20 @@ export class GiveawayController {
     }
   }
 
+  public async getAllGiveaways(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const giveaways = await prisma.giveaway.findMany();
+
+      res.status(200).send(giveaways);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async drawGiveaway(req: Request, res: Response, next: NextFunction) {
     try {
       const { giveawayId } = req.body;

@@ -18,6 +18,8 @@ router.get("/authenticate", authenticateJwt, authController.authenticate);
 
 router.post("/login", authController.login);
 
+router.post("/adminLogin", authController.adminLogin);
+
 router.post(
   "/sendOtp",
   validateBodyParams("email"),
@@ -31,5 +33,7 @@ router.get(
   authenticateJwt,
   authController.getUserTransactions
 );
+
+router.get("/allTransactions", authController.getAllTransactions);
 
 export { router as auth };

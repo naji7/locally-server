@@ -3,7 +3,8 @@ import { generatedOTP } from "../../utils";
 import { prisma } from "./main";
 
 export const createUser = async ({ data }: any) => {
-  const { fullName, teleNo, email, password, subId, durationType } = data;
+  const { fullName, teleNo, email, password, subId, durationType, refferalId } =
+    data;
   try {
     let endsAt;
 
@@ -20,6 +21,24 @@ export const createUser = async ({ data }: any) => {
       default:
         throw new Error("Invalid durationType");
     }
+
+    // if (refferalId) {
+    //   const refferalUser = await prisma.user.findFirst({
+    //     where: {
+    //       id: refferalId,
+    //     },
+    //     select: {
+    //       subscriptionPlan: true,
+    //     },
+    //   });
+
+    //   console.log("refferalUser : ", refferalUser.s);
+    //   const refferal = await prisma.referral.create({
+    //     data: {
+    //       referredBy: refferalId,
+    //     },
+    //   });
+    // }
 
     const user = await prisma.user.create({
       data: {

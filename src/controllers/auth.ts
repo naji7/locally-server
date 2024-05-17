@@ -204,6 +204,20 @@ export class AuthController {
     }
   }
 
+  public async getAllTransactions(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const txns = await prisma.transaction.findMany();
+
+      return res.status(200).send(txns);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async login(req: Request, res: Response, next: NextFunction) {
     try {
       req.body = { ...req.body, email: req.body.email.toLowerCase() };
@@ -216,6 +230,46 @@ export class AuthController {
       const user = await prisma.user.findUnique({
         where: {
           email,
+        },
+      });
+
+      if (!user || !user.password)
+        throw new AppError("User doesn't exists", 404);
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) throw new AppError("Wrong Password", 401);
+
+      const payload = {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email || "",
+      };
+
+      const token = generateJWT(payload);
+
+      res.status(200).send({
+        token,
+        message: "Successfully logged in",
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  public async adminLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      req.body = { ...req.body, email: req.body.email.toLowerCase() };
+
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        throw new AppError("Missing Fields", 404);
+      }
+      const user = await prisma.user.findUnique({
+        where: {
+          email,
+          role: "ADMIN",
         },
       });
 
