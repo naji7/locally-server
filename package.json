@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.11.30",
     "prisma": "^5.11.0",
     "ts-node": "^10.9.2",
@@ -38,6 +39,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "save-dev": "^0.0.1-security",
